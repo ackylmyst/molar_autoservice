@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Система заявок</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        * {
+            box-sizing: border-box; /* ВАЖНО */
+        }
+
+        body {
+            margin: 0;
+            font-family: Roboto, Arial, sans-serif;
+            background: #f5f5f5;
+        }
+
+        .layout {
+            display: flex;
+        }
+
+        .sidebar {
+            width: 220px;
+            height: 100vh;
+            background: #1f1f1f;
+            padding-top: 20px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            transition: 0.3s;
+        }
+
+        .sidebar a {
+            display: block;
+            color: #e0e0e0;
+            padding: 14px 20px;
+            text-decoration: none;
+            border-radius: 12px;
+            margin: 5px 10px;
+        }
+
+        .sidebar a:hover {
+            background: #2c2c2c;
+        }
+
+        .content {
+            margin-left: 220px;
+            padding: 20px;
+            flex: 1;
+        }
+
+        .menu-btn {
+            display: none;
+            font-size: 24px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                left: -220px;
+            }
+
+            .sidebar.active {
+                left: 0;
+            }
+
+            .content {
+                margin-left: 0;
+            }
+
+            .menu-btn {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="layout">
+
+    <div id="sidebar" class="sidebar">
+        <a href="/requests/">Заявки</a>
+    </div>
+
+    <div class="content">
+        <div class="menu-btn" onclick="toggleMenu()">☰</div>
+        {% block content %}{% endblock %}
+    </div>
+
+</div>
+
+<script>
+    function toggleMenu() {
+        document.getElementById('sidebar').classList.toggle('active');
+    }
+</script>
+
+</body>
+</html>
