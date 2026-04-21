@@ -6,6 +6,8 @@ from .models import User, Client, Car, Order
 
 
 def orders_page(request):
+    status_filter = request.GET.get('status', 'all')
+    
     if request.method == "POST":
         name = request.POST.get('name')
         surname = request.POST.get('surname')
@@ -90,9 +92,9 @@ def orders_page(request):
             messages.error(request, f'Ошибка: {str(e)}')
             return redirect('/')
     
-    orders = Order.objects.select_related('client_id__user_id').all().order_by('-created_at')
+    orders_all = Order.objects.select_related('client_id__user_id').all().order_by('-created_at')
     
-    for order in orders:
+    for order in orders_all:
         if order.car_id:
             try:
                 order.car = Car.objects.get(id=order.car_id)
@@ -101,7 +103,60 @@ def orders_page(request):
         else:
             order.car = None
     
-    return render(request, 'orders.html', {'orders': orders})
+    if status_filter != 'all':
+        orders = orders_all.filter(status_id=status_filter)
+    else:
+        orders = orders_all
+    
+    orders_new = orders_all.filter(status_id=1)
+    orders_work = orders_all.filter(status_id=2)
+    orders_done = orders_all.filter(status_id=3)
+    orders_canceled = orders_all.filter(status_id=4)
+    
+    statuses = {1: 'Новая', 2: 'В работе', 3: 'Завершена', 4: 'Отменена'}
+    
+    return render(request, 'orders.html', {
+        'orders': orders,
+        'statuses': statuses,
+        'current_status': status_filter,
+        'orders_all': orders_all,
+        'orders_new': orders_new,
+        'orders_work': orders_work,
+        'orders_done': orders_done,
+        'orders_canceled': orders_canceled,
+    })
+
+
+def edit_order(request, order_id):
+    order = Order.objects.select_related('client_id__user_id').filter(id=order_id).first()
+    
+    if not order:
+        messages.error(request, 'Заявка не найдена')
+        return redirect('/')
+    
+    if order.car_id:
+        try:
+            order.car = Car.objects.get(id=order.car_id)
+        except Car.DoesNotExist:
+            order.car = None
+    
+    if request.method == "POST":
+        problem_desc = request.POST.get('problem_desc', '')
+        status_id = request.POST.get('status_id', 1)
+        
+        try:
+            with transaction.atomic():
+                order.problem_desc = problem_desc
+                order.status_id = status_id
+                order.save()
+                
+                messages.success(request, f'Заявка #{order.id} успешно обновлена!')
+                return redirect('/')
+        except Exception as e:
+            messages.error(request, f'Ошибка: {str(e)}')
+            return redirect('/')
+    
+    return render(request, 'edit_order.html', {'order': order})
 
 
 def get_client_by_phone(request):
