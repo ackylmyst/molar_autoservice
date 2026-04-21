@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .edit-container {
+        max-width: 500px;
+        margin: 0 auto;
+        background: white;
+        padding: 20px;
+        border-radius: 16px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .edit-container h2 {
+        margin-top: 0;
+        color: #333;
+    }
+    .info-block {
+        background: #e3f2fd;
+        padding: 12px;
+        border-radius: 12px;
+        margin: 15px 0;
+    }
+    .info-block p {
+        margin: 5px 0;
+    }
+    label {
+        display: block;
+        margin-top: 15px;
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+    textarea, select {
+        width: 100%;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        font-size: 14px;
+        box-sizing: border-box;
+    }
+    .current-status {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: bold;
+        margin-left: 10px;
+    }
+    .status-1 { background: #2196f3; color: white; }
+    .status-2 { background: #ff9800; color: white; }
+    .status-3 { background: #4caf50; color: white; }
+    .status-4 { background: #f44336; color: white; }
+    button {
+        margin-top: 20px;
+        padding: 10px 20px;
+        background: #6200ee;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+    button:hover {
+        background: #4b00c2;
+    }
+    .cancel-btn {
+        background: #666;
+        margin-left: 10px;
+        text-decoration: none;
+        display: inline-block;
+        padding: 10px 20px;
+        border-radius: 8px;
+        color: white;
+    }
+    .cancel-btn:hover {
+        background: #555;
+    }
+
+</style>
+
+<div class="edit-container">
+    <h2>
+        Редактирование заявки #{{ order.id }}
+        <span class="current-status status-{{ order.status_id }}">
+            {% if order.status_id == 1 %}🆕 Новая
+            {% elif order.status_id == 2 %}⚙️ В работе
+            {% elif order.status_id == 3 %}✅ Завершена
+            {% elif order.status_id == 4 %}❌ Отменена
+            {% endif %}
+        </span>
+    </h2>
+    
+    <div class="info-block">
+        <p><strong>Клиент:</strong> {{ order.client_id.user_id.surname }} {{ order.client_id.user_id.name }}</p>
+        <p><strong>Телефон:</strong> {{ order.client_id.phone }}</p>
+        <p><strong>Email:</strong> {{ order.client_id.user_id.email }}</p>
+        {% if order.car %}
+        <p><strong>Автомобиль:</strong> {{ order.car.brand }} {{ order.car.model }} ({{ order.car.plate_number }})</p>
+        {% endif %}
+        <p><strong>Дата создания:</strong> {{ order.created_at|date:"d.m.Y H:i" }}</p>
+    </div>
+    
+    <form method="POST">
+        {% csrf_token %}
+        
+        <label>Описание проблемы:</label>
+        <textarea name="problem_desc" rows="5">{{ order.problem_desc }}</textarea>
+        
+        <label>Статус заявки:</label>
+        <select name="status_id">
+            <option value="1" {% if order.status_id == 1 %}selected{% endif %}>🆕 Новая</option>
+            <option value="2" {% if order.status_id == 2 %}selected{% endif %}>⚙️ В работе</option>
+            <option value="3" {% if order.status_id == 3 %}selected{% endif %}>✅ Завершена</option>
+            <option value="4" {% if order.status_id == 4 %}selected{% endif %}>❌ Отменена</option>
+        </select>
+        
+        <button type="submit">Сохранить изменения</button>
+        <a href="/" class="cancel-btn">Отмена</a>
+    </form>
+</div>
+{% endblock %}
