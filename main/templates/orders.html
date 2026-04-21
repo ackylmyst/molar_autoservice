@@ -145,13 +145,85 @@
         color: #0c5460;
         border: 1px solid #bee5eb;
     }
+    .filter-bar {
+        background: white;
+        padding: 12px 20px;
+        border-radius: 40px;
+        margin-bottom: 24px;
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        align-items: center;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    
+    .filter-btn {
+        padding: 8px 20px;
+        border-radius: 30px;
+        border: none;
+        background: #f0f0f0;
+        cursor: pointer;
+        text-decoration: none;
+        color: #555;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+    
+    .filter-btn:hover {
+        background: #e0e0e0;
+        color: #333;
+    }
+    
+    .filter-btn.active {
+        background: #6200ee;
+        color: white;
+        box-shadow: 0 2px 8px rgba(98, 0, 238, 0.3);
+    }
+    
+    .filter-count {
+        background: rgba(0,0,0,0.1);
+        border-radius: 20px;
+        padding: 2px 8px;
+        font-size: 12px;
+        margin-left: 6px;
+    }
+    
+    .filter-btn.active .filter-count {
+        background: rgba(255,255,255,0.25);
+    }
 </style>
 
 <h1>Заявки</h1>
 
+<div class="filter-bar">
+    <a href="/?status=all" class="filter-btn {% if current_status == 'all' %}active{% endif %}">
+        Все <span class="filter-count">{{ orders_all|length }}</span>
+    </a>
+    <a href="/?status=1" class="filter-btn {% if current_status == '1' %}active{% endif %}">
+        🆕 Новые <span class="filter-count">{{ orders_new|length }}</span>
+    </a>
+    <a href="/?status=2" class="filter-btn {% if current_status == '2' %}active{% endif %}">
+        ⚙️ В работе <span class="filter-count">{{ orders_work|length }}</span>
+    </a>
+    <a href="/?status=3" class="filter-btn {% if current_status == '3' %}active{% endif %}">
+        ✅ Завершённые <span class="filter-count">{{ orders_done|length }}</span>
+    </a>
+    <a href="/?status=4" class="filter-btn {% if current_status == '4' %}active{% endif %}">
+        ❌ Отменённые <span class="filter-count">{{ orders_canceled|length }}</span>
+    </a>
+</div>
+
 <div class="grid">
     {% for order in orders %}
         <div class="card">
+            <span class="status-badge status-{{ order.status_id }}">
+                {% if order.status_id == 1 %}🆕 Новая
+                {% elif order.status_id == 2 %}⚙️ В работе
+                {% elif order.status_id == 3 %}✅ Завершена
+                {% elif order.status_id == 4 %}❌ Отменена
+                {% else %}Неизвестно{% endif %}
+            </span>
             <b>Заказ #{{ order.id }}</b>
             <div class="client-info">
                 <strong>{{ order.client_id.user_id.surname }} {{ order.client_id.user_id.name }}</strong><br>
@@ -175,6 +247,7 @@
             {% endif %}
             <div>{{ order.problem_desc|truncatechars:80 }}</div>
             <div class="order-date">{{ order.created_at|date:"d.m.Y H:i" }}</div>
+            <a href="/edit/{{ order.id }}/" style="display: inline-block; margin-top: 10px; padding: 5px 10px; background: #6200ee; color: white; text-decoration: none; border-radius: 8px; font-size: 12px;">Редактировать</a>
         </div>
     {% empty %}
         <div class="card">Нет заявок</div>
