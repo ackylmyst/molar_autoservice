@@ -21,7 +21,7 @@ def orders_page(request):
         car_color = request.POST.get('car_color', '')
         problem_desc = request.POST.get('problem_desc', '')
         
-        if not all([name, surname, email, phone, car_brand, car_model, car_plate]):
+        if not all([name, surname, email, phone, car_brand, car_model, car_plate, vin, car_year, car_color, problem_desc]):
             messages.error(request, 'Пожалуйста, заполните все поля')
             return redirect('/')
         
